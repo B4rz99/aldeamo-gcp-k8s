@@ -7,3 +7,6 @@ creds.json
 *.pem
 .kube/
 .env
+.ssh/
+*.pub
+ansible/hosts
