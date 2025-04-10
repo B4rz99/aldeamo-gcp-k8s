@@ -15,4 +15,12 @@ module "compute" {
   subnet = module.network.subnet_id
   ssh_user = var.ssh_user
   ssh_public_key_path = var.ssh_public_key_path
+  depends_on = [module.network]
+}
+
+module "gke" {
+  source = "./modules/gke"
+  region = var.region
+  network = module.network.vpc_id
+  subnet = module.network.subnet_id
 }

@@ -16,6 +16,8 @@ resource "google_compute_instance" "proxy_instance" {
         access_config {}
     }
 
+    depends_on = [var.subnet]
+
     metadata = {
         ssh-keys = "${var.ssh_user}:${file(var.ssh_public_key_path)}"
     }

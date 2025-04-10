@@ -1,26 +1,55 @@
-- name: Install NGINX to verify VM reachability
+- name: Install and configure NGINX reverse proxy
   hosts: proxy
-  become: true
+  become: yes
 
   tasks:
-    - name: Update apt cache
-      apt:
-        update_cache: yes
-        cache_valid_time: 3600
+    - name: Disable man-db trigger (skip slow mandb update)
+      copy:
+        dest: /etc/dpkg/dpkg.cfg.d/exclude-man-db
+        content: |
+          path-exclude /usr/share/man/*
 
-    - name: Install NGINX
+    - name: Wait for dpkg and apt locks to be released (max 180s)
+      shell: |
+        timeout=180
+        while pgrep -x "apt.systemd.daily" >/dev/null || \
+              fuser /var/lib/dpkg/lock >/dev/null 2>&1 || \
+              fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do
+          echo "Waiting for locks to release..."
+          sleep 5
+          timeout=$((timeout - 5))
+          if [ "$timeout" -le 0 ]; then
+            echo "Timeout waiting for apt/dpkg to unlock"
+            exit 1
+          fi
+        done
+      changed_when: false
+
+    - name: Recover dpkg from interrupted state (if needed)
+      shell: |
+        if [ -f /var/lib/dpkg/lock-frontend ]; then
+          echo "Checking for dpkg reconfiguration..."
+          sudo dpkg --configure -a
+        fi
+      changed_when: false
+      ignore_errors: true
+
+    - name: Install NGINX with retry and timeout
       apt:
         name: nginx
         state: present
+      register: nginx_result
+      retries: 5
+      delay: 10
+      until: nginx_result is succeeded
 
-    - name: Ensure NGINX is running
+    - name: Configure NGINX as reverse proxy to GKE Ingress
+      template:
+        src: nginx.conf.j2
+        dest: /etc/nginx/sites-available/default
+        mode: "0644"
+
+    - name: Reload NGINX to apply changes
       service:
         name: nginx
-        state: started
-        enabled: true
-
-    - name: Verify NGINX is responding
-      uri:
-        url: http://localhost
-        return_content: yes
-        status_code: 200
+        state: restarted
