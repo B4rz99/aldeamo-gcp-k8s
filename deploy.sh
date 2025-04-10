@@ -71,4 +71,8 @@ ansible-playbook -i hosts nginx-proxy.yml \
   --extra-vars "domain=$INGRESS_IP ingress_ip=$INGRESS_IP" -vv
 
 # STEP 11: Done!
-echo "Step 11: 🎉 Deployment complete! Visit: http://$INGRESS_IP"
+echo "Step 11: 🎉 Deployment complete!"
+echo "---------------------------------------------------"
+echo "GKE Ingress is accessible at: http://$INGRESS_IP"
+echo "Reverse Proxy (VM) is accessible at: http://$PROXY_IP"
+echo "---------------------------------------------------"
