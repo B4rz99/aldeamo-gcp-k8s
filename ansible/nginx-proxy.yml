@@ -49,11 +49,19 @@
         state: directory
         mode: "0755"
     
-    - name: Ensure pip and dependencies are installed for community.crypto
+    - name: Fix broken dependencies
       shell: |
         apt-get update -y
-        apt-get install -y --fix-missing \
-          python3-pip build-essential libssl-dev libffi-dev python3-dev
+        DEBIAN_FRONTEND=noninteractive apt-get install -f -y
+      register: fix_broken
+      retries: 3
+      delay: 10
+      until: fix_broken is succeeded
+
+    - name: Ensure pip and dependencies are installed for community.crypto
+      shell: |
+        DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-missing \
+          python3-pip build-essential libssl-dev libffi-dev python3-dev libpython3.9-dev
       register: apt_install
       retries: 3
       delay: 10

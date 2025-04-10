@@ -55,7 +55,7 @@ done
 echo "Step 8: Creating Ansible inventory..."
 cd "$PROJECT_ROOT/ansible"
 echo "[proxy]" > hosts
-echo "$PROXY_IP ansible_user=$SSH_USER ansible_ssh_private_key_file=$KEY_PATH" >> hosts
+echo "$PROXY_IP ansible_user=$SSH_USER ansible_ssh_private_key_file=$KEY_PATH ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'" >> hosts
 
 # STEP 9: Wait for SSH on the VM
 echo "Step 9: Waiting for VM SSH to become available..."
@@ -76,6 +76,6 @@ ansible-playbook -i hosts nginx-proxy.yml \
 # STEP 12: Done!
 echo "Step 11: 🎉 Deployment complete!"
 echo "---------------------------------------------------"
+echo "Reverse Proxy (VM) is accessible at: https://$PROXY_IP"
 echo "GKE Ingress is accessible at: http://$INGRESS_IP"
-echo "Reverse Proxy (VM) is accessible at: http://$PROXY_IP"
 echo "---------------------------------------------------"
