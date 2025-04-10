@@ -22,8 +22,3 @@ variable "region" {
    description = "Path to the public SSH key for the proxy VM"
    type        = string
  }
- 
- # variable "domain" {
- #   description = "The domain name (e.g. www.example.com) for the HTTPS proxy"
- #   type        = string
- # }

@@ -1,14 +1,8 @@
-- name: Install and configure NGINX reverse proxy
+- name: Install and configure NGINX reverse proxy with TLS and rate limiting
   hosts: proxy
   become: yes
 
   tasks:
-    - name: Disable man-db trigger (skip slow mandb update)
-      copy:
-        dest: /etc/dpkg/dpkg.cfg.d/exclude-man-db
-        content: |
-          path-exclude /usr/share/man/*
-
     - name: Wait for dpkg and apt locks to be released (max 180s)
       shell: |
         timeout=180
@@ -34,7 +28,13 @@
       changed_when: false
       ignore_errors: true
 
-    - name: Install NGINX with retry and timeout
+    - name: Purge man-db to skip slow triggers
+      apt:
+        name: man-db
+        state: absent
+        purge: yes
+
+    - name: Install NGINX
       apt:
         name: nginx
         state: present
@@ -43,13 +43,54 @@
       delay: 10
       until: nginx_result is succeeded
 
-    - name: Configure NGINX as reverse proxy to GKE Ingress
+    - name: Ensure SSL directory exists
+      file:
+        path: /etc/nginx/ssl
+        state: directory
+        mode: "0755"
+    
+    - name: Ensure pip and dependencies are installed for community.crypto
+      shell: |
+        apt-get update -y
+        apt-get install -y --fix-missing \
+          python3-pip build-essential libssl-dev libffi-dev python3-dev
+      register: apt_install
+      retries: 3
+      delay: 10
+      until: apt_install is succeeded
+
+    - name: Debug apt install result (if needed)
+      debug:
+        var: apt_install
+
+    - name: Install cryptography via pip
+      pip:
+        name: cryptography
+        executable: pip3
+
+    - name: Generate private key for self-signed cert
+      community.crypto.openssl_privatekey:
+        path: /etc/nginx/ssl/nginx.key
+        size: 2048
+        type: RSA
+
+    - name: Generate self-signed SSL certificate
+      community.crypto.x509_certificate:
+        path: /etc/nginx/ssl/nginx.crt
+        privatekey_path: /etc/nginx/ssl/nginx.key
+        provider: selfsigned
+        selfsigned_not_after: "+365d"
+      notify: Reload NGINX
+
+    - name: Configure NGINX as reverse proxy with TLS and rate limiting
       template:
         src: nginx.conf.j2
         dest: /etc/nginx/sites-available/default
         mode: "0644"
+      notify: Reload NGINX
 
-    - name: Reload NGINX to apply changes
+  handlers:
+    - name: Reload NGINX
       service:
         name: nginx
-        state: restarted
+        state: reloaded

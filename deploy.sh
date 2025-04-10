@@ -65,12 +65,15 @@ until ssh -o StrictHostKeyChecking=no -i "$KEY_PATH" -q "$SSH_USER@$PROXY_IP" ex
 done
 echo "SSH is now available!"
 
-# STEP 10: Run Ansible playbook for NGINX configuration
+# STEP 10:Install Ansible collection dependencies
+ansible-galaxy collection install -r "$PROJECT_ROOT/ansible/requirements.yml"
+
+# STEP 11: Run Ansible playbook for NGINX configuration
 echo "Step 10: Running Ansible playbook..."
 ansible-playbook -i hosts nginx-proxy.yml \
   --extra-vars "domain=$INGRESS_IP ingress_ip=$INGRESS_IP" -vv
 
-# STEP 11: Done!
+# STEP 12: Done!
 echo "Step 11: 🎉 Deployment complete!"
 echo "---------------------------------------------------"
 echo "GKE Ingress is accessible at: http://$INGRESS_IP"

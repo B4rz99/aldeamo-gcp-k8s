@@ -1,7 +1,19 @@
+limit_req_zone $binary_remote_addr zone=req_limit_per_ip:10m rate=10r/s;
+
 server {
     listen 80;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+
+    ssl_certificate /etc/nginx/ssl/nginx.crt;
+    ssl_certificate_key /etc/nginx/ssl/nginx.key;
 
     location / {
+        limit_req zone=req_limit_per_ip burst=20 nodelay;
+
         proxy_pass http://{{ ingress_ip }};
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;

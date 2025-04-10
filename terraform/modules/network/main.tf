@@ -35,3 +35,16 @@ resource "google_compute_firewall" "allow-http" {
   source_ranges = ["0.0.0.0/0"]
   target_tags   = ["proxy"]
 }
+
+resource "google_compute_firewall" "allow-https" {
+  name    = "allow-https"
+  network = google_compute_network.vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["443"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["proxy"]
+}
