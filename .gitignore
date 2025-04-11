@@ -30,3 +30,6 @@ creds.json
 
 # Ansible dynamic or auto-generated inventory files
 ansible/hosts
+
+# macOS metadata files
+.DS_Store
