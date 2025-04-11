@@ -115,15 +115,28 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Set up Python and Install Ansible
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install Ansible and ansible-lint
         run: |
           python -m pip install --upgrade pip
           pip install ansible ansible-lint
+
+      - name: Generate fresh SSH key pair
+        run: |
+          mkdir -p .ssh
+          ssh-keygen -t rsa -b 4096 -f .ssh/id_rsa -N "" -C "terraform@proxy"
 
       # Terraform deploy steps
       - name: Terraform Init and Apply
