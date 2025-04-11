@@ -40,6 +40,9 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
+      - name: Install GKE Auth Plugin
+        run: gcloud components install gke-gcloud-auth-plugin --quiet
+
       - name: Capture Terraform Outputs
         id: tf-outputs
         working-directory: terraform
@@ -123,16 +126,8 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Cache pip dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       - name: Install Ansible and Ansible-Lint
-        run: pip install -r requirements.txt
+        run: pip install ansible ansible-lint
 
       - name: Generate fresh SSH key pair
         run: |
