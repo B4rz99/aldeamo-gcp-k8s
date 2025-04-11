@@ -43,33 +43,38 @@ jobs:
       - name: Install GKE Auth Plugin
         run: gcloud components install gke-gcloud-auth-plugin --quiet
 
+      - name: Terraform Init and Apply
+        working-directory: terraform
+        run: |
+          terraform init -input=false
+
       - name: Capture Terraform Outputs
         id: tf-outputs
         working-directory: terraform
         run: |
-          echo "CLUSTER_NAME=$(terraform output -raw cluster_name || echo '')" >> $GITHUB_ENV
-          echo "CLUSTER_LOCATION=$(terraform output -raw location || echo '')" >> $GITHUB_ENV
+          echo "CLUSTER_NAME=$(terraform output -raw cluster_name)" >> $GITHUB_ENV
+          echo "CLUSTER_LOCATION=$(terraform output -raw location)" >> $GITHUB_ENV
 
       - name: Destroy GKE Workloads and Cluster
         run: |
           if [[ -n "$CLUSTER_NAME" && -n "$CLUSTER_LOCATION" ]]; then
-            gcloud container clusters get-credentials "$CLUSTER_NAME" --region "$CLUSTER_LOCATION" || true
-            kubectl delete -f k8s --ignore-not-found || true
-            gcloud container clusters delete "$CLUSTER_NAME" --region "$CLUSTER_LOCATION" --quiet || true
+            gcloud container clusters get-credentials "$CLUSTER_NAME" --region "$CLUSTER_LOCATION"
+            kubectl delete -f k8s --ignore-not-found
+            gcloud container clusters delete "$CLUSTER_NAME" --region "$CLUSTER_LOCATION" --quiet
           else
             echo "GKE cluster not found or already deleted."
           fi
 
       - name: Destroy Compute Instances
         working-directory: terraform
-        run: terraform destroy -target=module.compute -auto-approve || true
+        run: terraform destroy -target=module.compute -auto-approve
 
       - name: Destroy Firewall Rules
         working-directory: terraform
         run: terraform destroy \
             -target=module.network.google_compute_firewall.allow-http \
             -target=module.network.google_compute_firewall.allow-ssh \
-            -auto-approve || true
+            -auto-approve
 
       - name: Force Delete NEGs
         run: |
@@ -78,12 +83,12 @@ jobs:
             --format="value(name, zone)" | while read -r neg zone_url; do
             zone=$(basename "$zone_url")
             echo "Deleting NEG: $neg in zone $zone..."
-            gcloud compute network-endpoint-groups delete "$neg" --zone="$zone" --quiet || echo "Could not delete $neg"
+            gcloud compute network-endpoint-groups delete "$neg" --zone="$zone" --quiet"
           done
 
       - name: Destroy Remaining Infrastructure
         working-directory: terraform
-        run: terraform destroy -auto-approve || true
+        run: terraform destroy -auto-approve
 
       - name: Clean up Local Artifacts
         run: |
