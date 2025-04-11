@@ -1,6 +1,6 @@
 # Specifies the Terraform version and required providers for this configuration.
 terraform {
-  required_version = ">= 1.11.3"
+  required_version = ">= 1.5.7"
 
   required_providers {
     google = {
