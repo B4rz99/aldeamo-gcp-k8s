@@ -86,8 +86,8 @@ jobs:
   # Deploy Job: Runs after destroy if action is 'destroy-deploy'
   deploy:
     name: Deploy Infrastructure & App
-    if: ${{ github.event.inputs.action == 'destroy-deploy' || github.event.inputs.action == 'deploy-only' }}
     needs: destroy
+    if: always() && ( github.event.inputs.action == 'destroy-deploy' || github.event.inputs.action == 'deploy-only' )
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
