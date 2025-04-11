@@ -1,3 +1,4 @@
+# Creates a Compute Engine instance to act as the HTTPS reverse proxy for GKE.
 resource "google_compute_instance" "proxy_instance" {
     name         = "proxy-instance"
     machine_type = "e2-micro"

@@ -1,3 +1,4 @@
+# Creates a GKE cluster.
 resource "google_container_cluster" "nginx_cluster" {
     name     = "nginx-cluster"
     location = var.region
@@ -13,6 +14,8 @@ resource "google_container_cluster" "nginx_cluster" {
     }
 }
 
+# Defines a custom node pool for the GKE cluster with preemptible VMs.
+# Used to run your workloads (like NGINX pods) on cost-efficient compute.
 resource "google_container_node_pool" "nginx_pool" {
     name       = "nginx-pool"
     location   = var.region

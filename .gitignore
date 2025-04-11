@@ -1,12 +1,32 @@
+# Terraform working directory (created by `terraform init`)
 .terraform/
-*.tfstate*
+
+# Terraform state files — contain sensitive data like resource IDs and secrets
+*.tfstate
+*.tfstate.*
+
+# Terraform variable overrides (commonly used for local secrets/configs)
 terraform.tfvars
+
+# Logs and retry files generated during failed Terraform/Ansible runs
 *.log
 *.retry
+
+# GCP service account credentials (NEVER commit this)
 creds.json
+
+# PEM private keys (e.g. SSH or TLS certs)
 *.pem
+
+# Local Kubernetes config directory (kubectl credentials etc.)
 .kube/
+
+# Environment variable files — often contain secrets or tokens
 .env
+
+# SSH keys and metadata generated for proxy VM access
 .ssh/
 *.pub
+
+# Ansible dynamic or auto-generated inventory files
 ansible/hosts
