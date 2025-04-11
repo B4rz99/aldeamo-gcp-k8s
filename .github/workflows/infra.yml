@@ -21,8 +21,6 @@ jobs:
     name: Destroy Infrastructure
     if: ${{ github.event.inputs.action == 'destroy-deploy' }}
     runs-on: ubuntu-latest
-    container:
-      image: google/cloud-sdk:latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -36,6 +34,11 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Capture Terraform Outputs
         id: tf-outputs
@@ -93,8 +96,6 @@ jobs:
     needs: destroy
     if: always() && ( github.event.inputs.action == 'destroy-deploy' || github.event.inputs.action == 'deploy-only' )
     runs-on: ubuntu-latest
-    container:
-      image: google/cloud-sdk:latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -108,6 +109,11 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Set up Python and Install Ansible
         uses: actions/setup-python@v5
