@@ -8,6 +8,13 @@ on:
         required: true
         default: "deploy-only"
 
+env:
+  TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
+  TF_VAR_region: ${{ secrets.GCP_REGION }}
+  TF_VAR_zone: ${{ secrets.GCP_ZONE }}
+  TF_VAR_ssh_user: ${{ secrets.SSH_USER }}
+  TF_VAR_ssh_public_key_path: ${{ secrets.SSH_PUBLIC_KEY_PATH }}
+
 jobs:
   # Destroy Job: Runs if action is 'destroy-deploy'
   destroy:
@@ -26,7 +33,7 @@ jobs:
           terraform_version: 1.5.7
 
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
@@ -98,7 +105,7 @@ jobs:
           terraform_version: 1.5.7
 
       - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v1
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
@@ -116,8 +123,8 @@ jobs:
       - name: Terraform Init and Apply
         working-directory: terraform
         run: |
-          terraform init
-          terraform apply -auto-approve -var="ssh_user=debian" -var="ssh_public_key_path=${{ github.workspace }}/.ssh/id_rsa.pub"
+          terraform init -input=false
+          terraform apply -auto-approve -input=false
 
       - name: Extract Terraform Outputs
         id: terraform-outputs
