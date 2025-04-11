@@ -65,6 +65,11 @@ jobs:
             echo "GKE cluster not found or already deleted."
           fi
 
+      - name: Generate SSH Key Pair
+        run: |
+          mkdir -p .ssh
+          ssh-keygen -t rsa -b 4096 -f .ssh/id_rsa -N "" -C "gha@proxy"
+
       - name: Destroy Compute Instances
         working-directory: terraform
         run: terraform destroy -target=module.compute -auto-approve
