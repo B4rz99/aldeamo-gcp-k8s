@@ -89,7 +89,7 @@ jobs:
             --format="value(name, zone)" | while read -r neg zone_url; do
             zone=$(basename "$zone_url")
             echo "Deleting NEG: $neg in zone $zone..."
-            gcloud compute network-endpoint-groups delete "$neg" --zone="$zone" --quiet"
+            gcloud compute network-endpoint-groups delete "$neg" --zone="$zone" --quiet
           done
 
       - name: Destroy Remaining Infrastructure
