@@ -76,7 +76,8 @@ jobs:
 
       - name: Destroy Firewall Rules
         working-directory: terraform
-        run: terraform destroy \
+        run: |
+          terraform destroy \
             -target=module.network.google_compute_firewall.allow-http \
             -target=module.network.google_compute_firewall.allow-ssh \
             -auto-approve
