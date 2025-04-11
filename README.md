@@ -7,6 +7,7 @@ It includes end-to-end infrastructure management, a TLS-terminating NGINX revers
 ⸻
 
 🔧 Features
+
 	GCP Infrastructure Provisioning (Terraform)
 	•	VPC & Subnet creation
 	•	Firewall rules for HTTP(S) & SSH
